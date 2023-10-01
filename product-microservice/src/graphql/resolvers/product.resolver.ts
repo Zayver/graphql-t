@@ -21,5 +21,14 @@ export const productResolver = {
         return await createProduct(args.product as IProduct)
       }
         
+    },
+    Product: {
+
+      __resolveReference(product: any,) {
+  
+        return getProductById(product.id);
+  
+      },
+  
     }
 }

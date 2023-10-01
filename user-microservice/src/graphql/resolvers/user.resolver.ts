@@ -26,5 +26,10 @@ export const userResolver = {
     async deleteUser(_:any, args:Record<string, any>){
       return await deleteUser(args.id)
     }
+  },
+  User: {
+    __resolveReference(user: any){
+      return getUserById(user.id)
+    }
   }
 }

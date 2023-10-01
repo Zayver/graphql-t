@@ -2,16 +2,18 @@ import { ApolloServer } from '@apollo/server';
 import express from "express";
 import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4"
+import { buildSubgraphSchema } from '@apollo/subgraph';
+import gql from 'graphql-tag';
 
 
-const typeDefs = `#graphql
-    extend schema @link(url: "https://specs.apollo.dev/federation/v2.0",  import: ["@key"])
+const typeDefs = gql`#graphql
+    extend schema @link(url: "https://specs.apollo.dev/federation/v2.0",  import: ["@key", "@external"])
 
-    type User @key(fields:"id"){
+    extend type User @key(fields:"id"){
         id: String! @external
     }
 
-    type Product @key(fields:"id"){
+    extend type Product @key(fields:"id"){
         id: String! @external
     }
 
@@ -20,10 +22,22 @@ const typeDefs = `#graphql
         user: User!
         products: [Product!]!
     }
+
+    type Query{
+        getOrder(id: String!): Order
+    }
 `;
 
 const resolvers = {
+    Order: {
 
+        __resolveReference(order: any) {
+
+            //return fetchUserById(user.id);
+
+        },
+
+    }
 };
 
 
@@ -39,8 +53,10 @@ const bootstrapServer = async () => {
     app.use(express.urlencoded({ extended: true }));
 
     const server = new ApolloServer({
-        typeDefs,
-        resolvers
+        schema: buildSubgraphSchema({
+            typeDefs,
+            resolvers
+        })
     });
     await server.start();
 
