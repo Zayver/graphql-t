@@ -118,6 +118,27 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - project
+  
+  mongodb-order:
+    image: mongo:latest
+    hostname: mongo-order
+    volumes:
+      - mongodb_data_order:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    networks:
+      - project
+
+  order-microservice:
+    build: ./order-microservice
+    hostname: order-microservice
+    environment:
+      MONGO_URL: mongodb://mongo-order:27017/
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+    networks:
+      - project
 
 
   
@@ -131,3 +152,4 @@ volumes:
   postgres_data:
   mongodb_data_user:
   mongodb_data_product:
+  mongodb_data_order:
