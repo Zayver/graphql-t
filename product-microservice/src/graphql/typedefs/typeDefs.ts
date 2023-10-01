@@ -19,6 +19,14 @@ export const productTypeDef = gql`#graphql
         iva: Float!
     }
 
+    input ProductUpdate{
+        name: String
+        value: Float
+        description: String
+        iva: Float
+    }
+
+
 
     type Query{
         products: [Product]
@@ -28,7 +36,7 @@ export const productTypeDef = gql`#graphql
 
     type Mutation{
         createProduct(product:ProductInput!): Product
-        # updateUser(id:String!, user:UserUpdate!): User
-        # deleteUser(id: String!): User
+        updateProduct(id:String!, user:ProductUpdate!): Product
+        deleteProduct(id: String!): Product
     }
 `;

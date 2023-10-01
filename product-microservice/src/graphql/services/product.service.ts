@@ -17,3 +17,11 @@ export const createProduct = async (product: IProduct) => {
     const nProduct = new Product(product)
     return await nProduct.save()
 }
+
+export const updateProduct = async (id:string, product: IProduct) => {
+    return await Product.findOneAndUpdate({_id: id}, product)
+}
+
+export const deleteProdcut = async (id: string) => {
+    return await Product.findByIdAndDelete(id)
+}
