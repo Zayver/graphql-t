@@ -1,129 +1,36 @@
 import { ApolloServer } from '@apollo/server';
-import { buildSubgraphSchema } from '@apollo/subgraph';
 import express from "express";
 import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4"
-import gql from 'graphql-tag';
 
 
-const typeDefs = gql`#graphql
-  type User {
-    id: String!
-    email: String!
-    name: String!
-    secondName: String
-    surName: String!
-    secondSurname: String
-    dir: String!
-  }
+const typeDefs = `#graphql
+    extend schema @link(url: "https://specs.apollo.dev/federation/v2.0",  import: ["@key"])
 
-  type Product{
-    id: String!
-    name: String!
-    value: Float!
-    description: String
-    iva: Float!
-  }
+    type User @key(fields:"id"){
+        id: String! @external
+    }
 
-  input UserInput {
-    id: String!
-    email: String!
-    name: String!
-    secondName: String
-    surName: String!
-    secondSurname: String
-    dir: String!
-  }
+    type Product @key(fields:"id"){
+        id: String! @external
+    }
 
-  input ProductInput{
-    id: String!
-    name: String!
-    value: Float!
-    description: String
-    iva: Float!
-  }
-
-  type Order{
-    id: String!
-    user: User!
-    product: Product!
-  }
-  
-  type Query{
-    getOrder: Order
-
-  }
-
-  type Mutation{
-    createOrder(user: UserInput!, product: ProductInput!): Order
-  }
+    type Order @key(fields: "id"){
+        id:String!
+        user: User!
+        products: [Product!]!
+    }
 `;
 
 const resolvers = {
-    User: {
-        __resolveReference(reference: any) {
-            fetch('http://user-microservice:4000', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    query: `
-                    query User {
-                        user(id: "${reference}") {
-                            id
-                            email
-                            name
-                            secondName
-                            surName
-                            secondSurname
-                            dir
-                        }
-                    }`
-                }),
-            })
-                .then(res => res.json())
-        },
-    },
-    Product: {
-        __resolveReference(reference: any) {
-            fetch('http://product-microservice:4000', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    query: `
-                    query Product {
-                        product(id: "${reference}") {
-                            id
-                            name
-                            value
-                            description
-                            iva
-                        }
-                    }`
-                }),
-            })
-                .then(res => res.json())
-        },
-        // Implement other resolvers for Product fields here
-    },
 
-    Query: {
-        getOrder() {
-
-        }
-    },
-    Mutation: {
-        createOrder(_: any, args: Record<string, any>) {
-            console.log(args.user)
-            console.log(args.product)
-        }
-    }
 };
 
 
 
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4002;
 
 const bootstrapServer = async () => {
 
@@ -132,10 +39,8 @@ const bootstrapServer = async () => {
     app.use(express.urlencoded({ extended: true }));
 
     const server = new ApolloServer({
-        schema: buildSubgraphSchema({
-            typeDefs,
-            resolvers,
-        })
+        typeDefs,
+        resolvers
     });
     await server.start();
 
