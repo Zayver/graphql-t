@@ -77,17 +77,48 @@ services:
     networks:
       - project
 
-  mongodb:
+  mongodb-user:
     image: mongo:latest
-    hostname: mongo
+    hostname: mongo-user
     volumes:
-      - mongodb_data:/data/db
+      - mongodb_data_user:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    networks:
+      - project
+  
+  user-microservice:
+    build: ./user-microservice
+    hostname: user-microservice
+    environment:
+      MONGO_URL: mongodb://mongo-user:27017/
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+    networks:
+      - project
 
-    ports:
-      - "27017:27017"
+  mongodb-product:
+    image: mongo:latest
+    hostname: mongo-product
+    volumes:
+      - mongodb_data_product:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    networks:
+      - project
+
+  product-microservice:
+    build: ./product-microservice
+    hostname: product-microservice
+    environment:
+      MONGO_URL: mongodb://mongo-product:27017/
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+    networks:
+      - project
+
 
   
 
@@ -98,4 +129,5 @@ networks:
 
 volumes:
   postgres_data:
-  mongodb_data:
+  mongodb_data_user:
+  mongodb_data_product:
