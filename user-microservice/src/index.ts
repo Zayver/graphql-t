@@ -11,7 +11,7 @@ import { buildSubgraphSchema } from "@apollo/subgraph";
 const app = express();
 const port = process.env.PORT || 4000;
 
-//connectDb()
+connectDb()
 const bootstrapServer = async () => {
 
   app.use(cors());

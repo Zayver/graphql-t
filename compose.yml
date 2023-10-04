@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DATABASE}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
       interval: 30s
       timeout: 60s
       retries: 5
@@ -19,7 +19,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-    
   kong-migrations:
     image: kong
     command: kong migrations bootstrap
@@ -34,7 +33,7 @@ services:
     depends_on:
       kong-db:
         condition: service_healthy
-  
+
   kong:
     image: kong
     container_name: kong
@@ -57,8 +56,8 @@ services:
       kong-migrations:
         condition: service_completed_successfully
     networks:
-      - project 
-    
+      - project
+
   konga:
     hostname: konga
     image: pantsel/konga
@@ -87,7 +86,13 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - project
-  
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
   user-microservice:
     build: ./user-microservice
     hostname: user-microservice
@@ -97,6 +102,9 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - project
+    depends_on:
+      mongodb-user:
+        condition: service_healthy
 
   mongodb-product:
     image: mongo:latest
@@ -108,6 +116,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - project
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   product-microservice:
     build: ./product-microservice
@@ -118,7 +132,10 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - project
-  
+    depends_on:
+      mongodb-product:
+        condition: service_healthy
+
   mongodb-order:
     image: mongo:latest
     hostname: mongo-order
@@ -129,6 +146,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - project
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   order-microservice:
     build: ./order-microservice
@@ -139,14 +162,38 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - project
+    depends_on:
+      mongodb-order:
+        condition: service_healthy
 
+  gateway:
+    build: ./gateway
+    hostname: gateway
+    environment:
+      USER_URL: http://user-microservice:4000/graphql
+      PRODUCT_URL: http://product-microservice:4000/graphql
+      ORDER_URL: http://order-microservice:4000/graphql  
+    networks:
+      - project
 
-  
+    depends_on:
+      user-microservice:
+        condition: service_started
+      product-microservice:
+        condition: service_started
+      order-microservice:
+        condition: service_started
+    
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 5
+        window: 60s
 
 networks:
   project:
     driver: bridge
-
 
 volumes:
   postgres_data:

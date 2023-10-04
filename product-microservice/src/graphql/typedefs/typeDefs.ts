@@ -5,7 +5,7 @@ export const productTypeDef = gql`#graphql
     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0",  import: ["@key"])
 
     type Product @key(fields: "id"){
-        id: String!
+        id: ID!
         name: String!
         value: Float!
         description: String
@@ -30,13 +30,13 @@ export const productTypeDef = gql`#graphql
 
     type Query{
         products: [Product]
-        product(id: String!): Product
+        product(id: ID!): Product
         productByName(name: String!): Product
     } 
 
     type Mutation{
         createProduct(product:ProductInput!): Product
-        updateProduct(id:String!, user:ProductUpdate!): Product
-        deleteProduct(id: String!): Product
+        updateProduct(id:ID!, user:ProductUpdate!): Product
+        deleteProduct(id: ID!): Product
     }
 `;

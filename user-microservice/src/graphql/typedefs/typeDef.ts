@@ -4,7 +4,7 @@ export const userTypeDef = gql`#graphql
     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0",  import: ["@key"])
 
     type User @key(fields:"id"){
-        id: String!
+        id: ID!
         email: String!
         name: String!
         secondName: String
@@ -31,14 +31,14 @@ export const userTypeDef = gql`#graphql
     }
 
     type Query{
-        user(id: String!): User
+        user(id: ID!): User
         users: [User]
         userByName(name: String!, surname: String): User
     } 
 
     type Mutation{
         createUser(user:UserInput!): User
-        updateUser(id:String!, user:UserUpdate!): User
-        deleteUser(id: String!): User
+        updateUser(id:ID!, user:UserUpdate!): User
+        deleteUser(id: ID!): User
     }
 `;

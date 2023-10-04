@@ -8,15 +8,15 @@ import express from "express";
 const gateway = new ApolloGateway({
     supergraphSdl: new IntrospectAndCompose({
         subgraphs: [
-            { name: 'users', url: 'http://localhost:4000/graphql' },
-            { name: 'products', url: 'http://localhost:4001/graphql' },
-            { name: 'order', url: 'http://localhost:4002/graphql' },
+            { name: 'users', url: process.env.USER_URL },
+            { name: 'products', url: process.env.PRODUCT_URL },
+            { name: 'order', url: process.env.ORDER_URL },
         ]
     })
 });
 
 const app = express();
-const port = process.env.PORT || 4003;
+const port = process.env.PORT || 4000;
 
 const bootstrapServer = async () => {
     const server = new ApolloServer({ gateway });
