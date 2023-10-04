@@ -3,18 +3,10 @@ import gql from "graphql-tag";
 export const orderTypeDef = gql`#graphql
     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0",  import: ["@key", "@external"])
 
-    extend type User @key(fields:"id"){
-        id: ID! @external
-    }
-
-    extend type Product @key(fields:"id"){
-        id: ID! @external
-    }
-
-    type Order{
+    type Order @key(fields: "id"){
         id:String!
-        user: User!
-        products: [Product!]!
+        user: String!
+        products: [String!]!
     }
 
     type Query{
@@ -22,6 +14,8 @@ export const orderTypeDef = gql`#graphql
         getOrders: [Order]
     }
     type Mutation{
-        createOrder(user: ID!, products: [ID!]!):Order
+        createOrder(user: String!, products: [String!]!):Order
+        clearOrders: Boolean
+        
     }
 `;

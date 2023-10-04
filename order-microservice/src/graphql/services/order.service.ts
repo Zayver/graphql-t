@@ -1,9 +1,9 @@
-import { MongooseError } from "mongoose"
 import Order from "../../model/order.model"
-import { checkUserId } from "../../services/checker.service"
+import { checkUserId, checkProducts } from "../../services/checker.service"
 
 export const orderById = async (id: string) => {
-    return await Order.findById(id)
+    const res = await Order.findById(id)
+    return res
 }
 
 export const getOrders = async () => {
@@ -12,4 +12,11 @@ export const getOrders = async () => {
 
 export const createOrder = async (userId: string, productsId: string[]) =>{
     checkUserId(userId)
+    checkProducts(productsId)
+    const t = new Order({user: userId, products: productsId})
+    return await t.save()
+}
+
+export const clearOrders = async ()=>{
+    Order.deleteMany({})
 }

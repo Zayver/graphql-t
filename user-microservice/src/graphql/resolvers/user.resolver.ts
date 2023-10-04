@@ -29,6 +29,7 @@ export const userResolver = {
   },
   User: {
     __resolveReference(user: any){
+      console.log("HEY:: "+user.id)
       return getUserById(user.id)
     }
   }

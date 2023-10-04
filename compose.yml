@@ -160,21 +160,26 @@ services:
       MONGO_URL: mongodb://mongo-order:27017/
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
+      USER_URL: http://user-microservice:4000/graphql
+      PRODUCT_URL: http://product-microservice:4000/graphql
     networks:
       - project
     depends_on:
       mongodb-order:
         condition: service_healthy
 
-  gateway:
+  federation:
     build: ./gateway
-    hostname: gateway
+    hostname: federation
     environment:
       USER_URL: http://user-microservice:4000/graphql
       PRODUCT_URL: http://product-microservice:4000/graphql
       ORDER_URL: http://order-microservice:4000/graphql  
     networks:
       - project
+
+    ports:
+      - "6060:4000"
 
     depends_on:
       user-microservice:
