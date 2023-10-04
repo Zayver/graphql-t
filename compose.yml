@@ -178,8 +178,7 @@ services:
     networks:
       - project
 
-    ports:
-      - "6060:4000"
+
 
     depends_on:
       user-microservice:
